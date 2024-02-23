@@ -1,0 +1,6 @@
+*.o
+test/test
+src/main
+main.dSYM
+.vscode
+skiplist.h
