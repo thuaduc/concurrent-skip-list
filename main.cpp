@@ -1,16 +1,25 @@
 #include "inc/concurrentSkipList.hpp"
 
 int main() {
-    ConcurrentSkipList csl(6, 0.5);  // Max Level is 3, Probability is 0.5
-    csl.insertElement(1, 1);
-    csl.insertElement(2, 1);
-    csl.insertElement(3, 1);
-    csl.insertElement(8, 1);
-    csl.insertElement(5, 1);
-    csl.insertElement(7, 1);
-    csl.insertElement(6, 1);
-    csl.insertElement(4, 1);
-    csl.insertElement(9, 1);
+    ConcurrentSkipList<uint16_t, 4, 3> csl{};
+    uint16_t length = 3;
+
+    for (uint16_t i = 1; i < length; i++) {
+        csl.insertElement(i);
+    }
+
+    for (uint16_t i = 1; i < length; i++) {
+        if (csl.searchElement(i)) {
+            std::cout << "True ";
+        }
+    }
+    std::cout << std::endl;
+
+    csl.displayList();
+
+    for (uint16_t i = 1; i < length; i++) {
+        csl.deleteElement(i);
+    }
 
     csl.displayList();
 }

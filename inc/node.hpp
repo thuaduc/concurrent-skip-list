@@ -1,15 +1,28 @@
 #pragma once
+#include <array>
 #include <iostream>
 #include <memory>
 #include <vector>
 
-// Node struct for the ConcurrentSkipList
+template <typename T, unsigned blockSize>
 struct Node {
-    Node(int key, int value, int level);
+    Node(T key, int level);
     ~Node() = default;
-    int getKey();
-
-    int value;
-    int key;
+    T getKey() const;
     std::vector<std::shared_ptr<Node>> forward;
+
+   private:
+    std::array<T, blockSize> keys;
+    int level;
 };
+
+template <typename T, unsigned blockSize>
+Node<T, blockSize>::Node(T key, int level) {
+    keys.at(0) = key;
+    forward.resize(level + 1);
+}
+
+template <typename T, unsigned blockSize>
+T Node<T, blockSize>::getKey() const {
+    return keys[0];
+}

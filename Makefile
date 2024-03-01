@@ -17,7 +17,7 @@ all: $(BINDIR)csl.a
 $(BINDIR)csl.a: $(OBJS)
 	ar rcs $@ $^
 
-$(OBJDIR)%.o: $(SRCDIR)%.cpp
+$(OBJDIR)%.o:
 	$(CXX) $(CFLAGS) $(INCLUDE_FLAGS) $< -o $@
 
 main: $(BINDIR)csl.a
