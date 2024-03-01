@@ -11,7 +11,6 @@
 
 using NodePtr = std::shared_ptr<Node>;
 
-// ConcurrentSkipList class
 struct ConcurrentSkipList {
    public:
     ConcurrentSkipList(int, float);

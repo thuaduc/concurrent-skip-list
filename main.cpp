@@ -1,4 +1,4 @@
-#include "concurrentSkipList.hpp"
+#include "inc/concurrentSkipList.hpp"
 
 int main() {
     ConcurrentSkipList csl(6, 0.5);  // Max Level is 3, Probability is 0.5

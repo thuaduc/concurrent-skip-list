@@ -1,6 +1,5 @@
-*.o
 test/test
-src/main
+main
 main.dSYM
 .vscode
 skiplist.h
