@@ -21,12 +21,18 @@ struct ConcurrentSkipList {
     void insertElement(T, K);
     void deleteElement(T);
     void displayList();
+    size_t size();
 
    private:
     int currentLevel = 0;
     size_t elementsCount = 0;
     std::shared_ptr<Node<T, K, blockSize>> header;
 };
+
+template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
+size_t ConcurrentSkipList<T, K, blockSize, maxLevel>::size() {
+    return this->elementsCount;
+}
 
 template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
 ConcurrentSkipList<T, K, blockSize, maxLevel>::ConcurrentSkipList() {
@@ -112,6 +118,8 @@ void ConcurrentSkipList<T, K, blockSize, maxLevel>::insertElement(T key,
 
 template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
 void ConcurrentSkipList<T, K, blockSize, maxLevel>::deleteElement(T key) {
+    if (!searchElement(key)) return;
+
     auto update = std::vector<std::shared_ptr<Node<T, K, blockSize>>>();
     update.resize(maxLevel + 1);
 

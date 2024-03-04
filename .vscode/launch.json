@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug main.cpp (LLDB)",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/main",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "externalConsole": false,
+            "preLaunchTask": "Build Debug"
+        },
+        {
+            "name": "C/C++ Runner: Debug Session",
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "/Users/nguyenduc/Downloads/Studium/SS 2024/thesis/concurrent-skip-list",
+            "program": "/Users/nguyenduc/Downloads/Studium/SS 2024/thesis/concurrent-skip-list/build/Debug/outDebug"
+        }
+    ]
+}

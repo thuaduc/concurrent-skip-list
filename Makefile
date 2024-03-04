@@ -15,7 +15,7 @@ INCLUDE_FLAGS = $(addprefix -I, $(INCDIR))
 all: main
 
 main: $(BINDIR)csl.a
-	$(CXX) -Wall -Wextra -O3 -o $@ main.cpp $^
+	$(CXX) -Wall -Wextra -g -O2 -o $@ main.cpp $^
 
 $(BINDIR)csl.a: $(OBJS)
 	ar rcs $@ $^
@@ -24,5 +24,6 @@ $(OBJDIR)%.o: $(SRCDIR)%.cpp
 	$(CXX) $(CFLAGS) $(INCLUDE_FLAGS) $< -o $@
 
 clean:
-	rm -f $(OBJDIR)* $(BINDIR)* main main.dSYM/*
+	rm -f $(OBJDIR)* $(BINDIR)* main 
+	rm -r main.dSYM
 
