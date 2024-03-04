@@ -11,41 +11,42 @@
 
 #include "node.hpp"
 
-template <typename T, unsigned blockSize, unsigned maxLevel>
+template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
 struct ConcurrentSkipList {
    public:
     ConcurrentSkipList();
     int generateRandomLevel();
-    std::shared_ptr<Node<T, blockSize>> createNode(T, int);
+    std::shared_ptr<Node<T, K, blockSize>> createNode(T, K, int);
     bool searchElement(T);
-    void insertElement(T);
+    void insertElement(T, K);
     void deleteElement(T);
     void displayList();
 
    private:
     int currentLevel = 0;
     size_t elementsCount = 0;
-    std::shared_ptr<Node<T, blockSize>> header;
+    std::shared_ptr<Node<T, K, blockSize>> header;
 };
 
-template <typename T, unsigned blockSize, unsigned maxLevel>
-ConcurrentSkipList<T, blockSize, maxLevel>::ConcurrentSkipList() {
-    this->header = createNode(std::numeric_limits<T>::min(), maxLevel);
+template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
+ConcurrentSkipList<T, K, blockSize, maxLevel>::ConcurrentSkipList() {
+    this->header = createNode(std::numeric_limits<T>::min(), 0, maxLevel);
 }
 
-template <typename T, unsigned blockSize, unsigned maxLevel>
-int ConcurrentSkipList<T, blockSize, maxLevel>::generateRandomLevel() {
+template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
+int ConcurrentSkipList<T, K, blockSize, maxLevel>::generateRandomLevel() {
     return rand() % maxLevel;
 }
 
-template <typename T, unsigned blockSize, unsigned maxLevel>
-std::shared_ptr<Node<T, blockSize>>
-ConcurrentSkipList<T, blockSize, maxLevel>::createNode(T key, int level) {
-    return std::make_shared<Node<T, blockSize>>(key, level);
+template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
+std::shared_ptr<Node<T, K, blockSize>>
+ConcurrentSkipList<T, K, blockSize, maxLevel>::createNode(T key, K value,
+                                                          int level) {
+    return std::make_shared<Node<T, K, blockSize>>(key, value, level);
 }
 
-template <typename T, unsigned blockSize, unsigned maxLevel>
-bool ConcurrentSkipList<T, blockSize, maxLevel>::searchElement(T key) {
+template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
+bool ConcurrentSkipList<T, K, blockSize, maxLevel>::searchElement(T key) {
     auto current = header;
 
     for (int i = this->currentLevel; i >= 0; --i) {
@@ -64,9 +65,10 @@ bool ConcurrentSkipList<T, blockSize, maxLevel>::searchElement(T key) {
     return false;
 }
 
-template <typename T, unsigned blockSize, unsigned maxLevel>
-void ConcurrentSkipList<T, blockSize, maxLevel>::insertElement(T key) {
-    auto update = std::vector<std::shared_ptr<Node<T, blockSize>>>();
+template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
+void ConcurrentSkipList<T, K, blockSize, maxLevel>::insertElement(T key,
+                                                                  K value) {
+    auto update = std::vector<std::shared_ptr<Node<T, K, blockSize>>>();
     update.resize(maxLevel + 1);
 
     auto current = header;
@@ -82,7 +84,7 @@ void ConcurrentSkipList<T, blockSize, maxLevel>::insertElement(T key) {
     current = current->forward[0];
 
     if (current != nullptr && current->getKey() == key) {
-        std::cerr << "key: " << key << " existed. Insert failed" << std::endl;
+        std::cerr << "Key: " << key << " existed. Insert failed" << std::endl;
         return;
     }
 
@@ -96,21 +98,21 @@ void ConcurrentSkipList<T, blockSize, maxLevel>::insertElement(T key) {
             this->currentLevel = randomLevel;
         }
 
-        std::shared_ptr<Node<T, blockSize>> insertedNode =
-            createNode(key, randomLevel);
+        std::shared_ptr<Node<T, K, blockSize>> insertedNode =
+            createNode(key, value, randomLevel);
 
         for (int i = 0; i <= randomLevel; i++) {
             insertedNode->forward[i] = update[i]->forward[i];
             update[i]->forward[i] = insertedNode;
         }
-        std::cout << "Successfully inserted key: " << key << std::endl;
+        // std::cout << "Successfully inserted key: " << key << std::endl;
         this->elementsCount++;
     }
 }
 
-template <typename T, unsigned blockSize, unsigned maxLevel>
-void ConcurrentSkipList<T, blockSize, maxLevel>::deleteElement(T key) {
-    auto update = std::vector<std::shared_ptr<Node<T, blockSize>>>();
+template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
+void ConcurrentSkipList<T, K, blockSize, maxLevel>::deleteElement(T key) {
+    auto update = std::vector<std::shared_ptr<Node<T, K, blockSize>>>();
     update.resize(maxLevel + 1);
 
     auto current = header;
@@ -136,8 +138,8 @@ void ConcurrentSkipList<T, blockSize, maxLevel>::deleteElement(T key) {
     return;
 }
 
-template <typename T, unsigned blockSize, unsigned maxLevel>
-void ConcurrentSkipList<T, blockSize, maxLevel>::displayList() {
+template <typename T, typename K, unsigned blockSize, unsigned maxLevel>
+void ConcurrentSkipList<T, K, blockSize, maxLevel>::displayList() {
     std::cout << "Concurrent Skip-List" << std::endl;
 
     if (header->forward[0] == nullptr) {

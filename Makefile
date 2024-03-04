@@ -1,5 +1,5 @@
 CXX = clang++ -std=c++20
-CFLAGS = -Wall -Wextra -c -O3 -g
+CFLAGS = -Wall -Wextra -c -O3
 
 SRCDIR = src/
 INCDIR = inc/
@@ -8,21 +8,21 @@ TESTDIR = test/
 BINDIR = bin/
 
 OBJS = $(addprefix $(OBJDIR), concurrentSkipList.o node.o)
-INCLUDE_FLAGS = -I$(INCDIR)
+INCLUDE_FLAGS = $(addprefix -I, $(INCDIR))
 
 .PHONY: all clean main
 
-all: $(BINDIR)csl.a
+all: main
+
+main: $(BINDIR)csl.a
+	$(CXX) -Wall -Wextra -O3 -o $@ main.cpp $^
 
 $(BINDIR)csl.a: $(OBJS)
 	ar rcs $@ $^
 
-$(OBJDIR)%.o:
+$(OBJDIR)%.o: $(SRCDIR)%.cpp
 	$(CXX) $(CFLAGS) $(INCLUDE_FLAGS) $< -o $@
 
-main: $(BINDIR)csl.a
-	$(CXX) -Wall -Wextra -O3 -g -o $@ main.cpp $< 
-
 clean:
-	rm -f $(OBJDIR)*
+	rm -f $(OBJDIR)* $(BINDIR)* main main.dSYM/*
 
