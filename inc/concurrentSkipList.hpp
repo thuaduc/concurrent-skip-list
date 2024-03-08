@@ -10,7 +10,6 @@
 #include <shared_mutex>
 #include <mutex>
 
-
 #include "node.hpp"
 
 template <typename T, typename K, unsigned maxLevel>
@@ -30,8 +29,8 @@ public:
 private:
     int currentLevel = 0;
     size_t elementsCount = 0;
-    mutable std::shared_mutex mutex;
-    std::shared_ptr<Node<T, K>> header;
+    std::shared_mutex mutex;
+    mutable std::shared_ptr<Node<T, K>> header;
     std::pair<std::shared_ptr<Node<T, K>>, std::vector<std::shared_ptr<Node<T, K>>>> searchHelper(T value);
 };
 
@@ -144,9 +143,6 @@ template <typename T, typename K, unsigned maxLevel>
 void ConcurrentSkipList<T, K, maxLevel>::deleteElement(T key)
 {
     std::unique_lock lock(mutex);
-    if (!searchElement(key))
-        return;
-
     auto [current, update] = searchHelper(key);
     if (current != nullptr && current->getKey() == key)
     {
