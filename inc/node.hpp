@@ -1,62 +1,39 @@
 #pragma once
 #include <array>
-#include <atomic>
 #include <iostream>
 #include <memory>
 #include <vector>
 
-template <typename T, typename K, unsigned blockSize>
-struct Node {
+template <typename T, typename K>
+struct Node
+{
     Node(T, K, int);
     ~Node() = default;
     T getKey() const;
     K getValue() const;
 
-    std::pair<T, K> getKeyValue() const;
-    void setKeyValue(T key, K value);
-    bool isKeyExisted(T key) const;
-
-    size_t elementsCount = 0;
     std::vector<std::shared_ptr<Node>> forward;
 
-   private:
-    std::array<std::atomic<T>, blockSize> keys;
-    std::array<std::atomic<K>, blockSize> values;
+private:
+    T key;
+    K value;
     int level;
 };
 
-template <typename T, typename K, unsigned blockSize>
-Node<T, K, blockSize>::Node(T key, K value, int level) {
-    keys.at(0).store(key);
-    values.at(0).store(value);
+template <typename T, typename K>
+Node<T, K>::Node(T key, K value, int level) : key{key}, value{value}
+{
     forward.resize(level + 1);
 }
 
-template <typename T, typename K, unsigned blockSize>
-T Node<T, K, blockSize>::getKey() const {
-    return keys.at(0).load();
+template <typename T, typename K>
+T Node<T, K>::getKey() const
+{
+    return key;
 }
 
-template <typename T, typename K, unsigned blockSize>
-K Node<T, K, blockSize>::getValue() const {
-    return values.at(0).load();
-}
-
-template <typename T, typename K, unsigned blockSize>
-std::pair<T, K> Node<T, K, blockSize>::getKeyValue() const {
-    return std::make_pair(keys.at(0).load(), values.at(0).load());
-}
-
-template <typename T, typename K, unsigned blockSize>
-void Node<T, K, blockSize>::setKeyValue(T key, K value) {
-    keys.at(0).store(key);
-    values.at(0).store(value);
-}
-
-template <typename T, typename K, unsigned blockSize>
-bool Node<T, K, blockSize>::isKeyExisted(T key) const {
-    for (const auto& k : keys) {
-        if (k.load() == key) return true;
-    }
-    return false;
+template <typename T, typename K>
+K Node<T, K>::getValue() const
+{
+    return value;
 }
