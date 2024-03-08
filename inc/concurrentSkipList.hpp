@@ -1,5 +1,4 @@
 #pragma once
-#include <atomic>
 #include <climits>
 #include <cstdlib>
 #include <iomanip>
@@ -9,6 +8,8 @@
 #include <sstream>
 #include <vector>
 #include <shared_mutex>
+#include <mutex>
+
 
 #include "node.hpp"
 
@@ -20,7 +21,6 @@ public:
     int generateRandomLevel();
     std::shared_ptr<Node<T, K>> createNode(T, K, int);
 
-    std::pair<std::shared_ptr<Node<T, K>>, std::vector<std::shared_ptr<Node<T, K>>>> searchHelper(T value);
     bool searchElement(T);
     void insertElement(T, K);
     void deleteElement(T);
@@ -30,8 +30,9 @@ public:
 private:
     int currentLevel = 0;
     size_t elementsCount = 0;
+    mutable std::shared_mutex mutex;
     std::shared_ptr<Node<T, K>> header;
-    std::shared_mutex mutex;
+    std::pair<std::shared_ptr<Node<T, K>>, std::vector<std::shared_ptr<Node<T, K>>>> searchHelper(T value);
 };
 
 template <typename T, typename K, unsigned maxLevel>
@@ -63,7 +64,7 @@ ConcurrentSkipList<T, K, maxLevel>::createNode(T key, K value,
 template <typename T, typename K, unsigned maxLevel>
 bool ConcurrentSkipList<T, K, maxLevel>::searchElement(T key)
 {
-    std::shared_lock<std::shared_mutex> lock(mutex);
+    std::shared_lock lock(mutex);
     auto current = header;
     for (int i = this->currentLevel; i >= 0; --i)
     {
@@ -108,7 +109,7 @@ template <typename T, typename K, unsigned maxLevel>
 void ConcurrentSkipList<T, K, maxLevel>::insertElement(T key,
                                                        K value)
 {
-    std::lock_guard<std::shared_mutex> lock(mutex);
+    std::unique_lock lock(mutex);
     auto [current, update] = searchHelper(key);
     if (current != nullptr && current->getKey() == key)
     {
@@ -135,7 +136,6 @@ void ConcurrentSkipList<T, K, maxLevel>::insertElement(T key,
             insertedNode->forward[i] = update[i]->forward[i];
             update[i]->forward[i] = insertedNode;
         }
-        // std::cout << "Successfully inserted key: " << key << std::endl;
         this->elementsCount++;
     }
 }
@@ -143,7 +143,7 @@ void ConcurrentSkipList<T, K, maxLevel>::insertElement(T key,
 template <typename T, typename K, unsigned maxLevel>
 void ConcurrentSkipList<T, K, maxLevel>::deleteElement(T key)
 {
-    std::lock_guard<std::shared_mutex> lock(mutex);
+    std::unique_lock lock(mutex);
     if (!searchElement(key))
         return;
 
