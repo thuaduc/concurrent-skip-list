@@ -7,8 +7,6 @@
 #include <memory>
 #include <sstream>
 #include <vector>
-#include <shared_mutex>
-#include <mutex>
 
 #include "node.hpp"
 
@@ -29,8 +27,7 @@ public:
 private:
     int currentLevel = 0;
     size_t elementsCount = 0;
-    std::shared_mutex mutex;
-    mutable std::shared_ptr<Node<T, K>> header;
+    std::shared_ptr<Node<T, K>> header;
     std::pair<std::shared_ptr<Node<T, K>>, std::vector<std::shared_ptr<Node<T, K>>>> searchHelper(T value);
 };
 
@@ -63,18 +60,17 @@ ConcurrentSkipList<T, K, maxLevel>::createNode(T key, K value,
 template <typename T, typename K, unsigned maxLevel>
 bool ConcurrentSkipList<T, K, maxLevel>::searchElement(T key)
 {
-    std::shared_lock lock(mutex);
     auto current = header;
     for (int i = this->currentLevel; i >= 0; --i)
     {
-        while (current->forward[i] != nullptr &&
-               current->forward[i]->getKey() < key)
+        while (current->getForward(i) != nullptr &&
+               current->getForward(i)->getKey() < key)
         {
-            current = current->forward[i];
+            current = current->getForward(i);
         }
     }
 
-    current = current->forward[0];
+    current = current->getForward(0);
 
     if (current != nullptr && current->getKey() == key)
     {
@@ -93,22 +89,21 @@ ConcurrentSkipList<T, K, maxLevel>::searchHelper(T key)
 
     for (int i = this->currentLevel; i >= 0; --i)
     {
-        while (current->forward[i] != nullptr &&
-               current->forward[i]->getKey() < key)
+        while (current->getForward(i) != nullptr &&
+               current->getForward(i)->getKey() < key)
         {
-            current = current->forward[i];
+            current = current->getForward(i);
         }
         update[i] = current;
     }
 
-    return std::make_pair(current->forward[0], update);
+    return std::make_pair(current->getForward(0), update);
 }
 
 template <typename T, typename K, unsigned maxLevel>
 void ConcurrentSkipList<T, K, maxLevel>::insertElement(T key,
                                                        K value)
 {
-    std::unique_lock lock(mutex);
     auto [current, update] = searchHelper(key);
     if (current != nullptr && current->getKey() == key)
     {
@@ -132,8 +127,8 @@ void ConcurrentSkipList<T, K, maxLevel>::insertElement(T key,
 
         for (int i = 0; i <= newLevel; i++)
         {
-            insertedNode->forward[i] = update[i]->forward[i];
-            update[i]->forward[i] = insertedNode;
+            insertedNode->setForward(i, update[i]->getForward(i));
+            update[i]->setForward(i, insertedNode);
         }
         this->elementsCount++;
     }
@@ -142,16 +137,15 @@ void ConcurrentSkipList<T, K, maxLevel>::insertElement(T key,
 template <typename T, typename K, unsigned maxLevel>
 void ConcurrentSkipList<T, K, maxLevel>::deleteElement(T key)
 {
-    std::unique_lock lock(mutex);
     auto [current, update] = searchHelper(key);
     if (current != nullptr && current->getKey() == key)
     {
         for (int i = 0; i <= this->currentLevel; i++)
         {
-            if (update[i]->forward[i] != current)
+            if (update[i]->getForward(i) != current)
                 break;
 
-            update[i]->forward[i] = current->forward[i];
+            update[i]->setForward(i, current->getForward(i));
         }
         this->elementsCount--;
     }
@@ -163,7 +157,7 @@ void ConcurrentSkipList<T, K, maxLevel>::displayList()
 {
     std::cout << "Concurrent Skip-List" << std::endl;
 
-    if (header->forward[0] == nullptr)
+    if (header->getForward(0) == nullptr)
     {
         std::cout << "List is empty" << std::endl;
         return;
@@ -174,12 +168,12 @@ void ConcurrentSkipList<T, K, maxLevel>::displayList()
     std::vector<std::vector<std::string>> builder(
         len, std::vector<std::string>(this->currentLevel + 1));
 
-    auto current = header->forward[0];
+    auto current = header->getForward(0);
     for (int i = 0; i < len; ++i)
     {
         for (int j = 0; j < this->currentLevel + 1; ++j)
         {
-            if (j < static_cast<int>(current->forward.size()))
+            if (j < static_cast<int>(current->getForwardSize()))
             {
                 std::ostringstream oss;
                 oss << std::setw(2) << std::setfill('0') << current->getKey();
@@ -190,7 +184,7 @@ void ConcurrentSkipList<T, K, maxLevel>::displayList()
                 builder.at(i).at(j) = "--";
             }
         }
-        current = current->forward.at(0);
+        current = current->getForward(0);
     }
 
     for (int i = this->currentLevel; i >= 0; --i)
