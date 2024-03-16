@@ -1,5 +1,5 @@
 CXX = clang++ -std=c++20
-CFLAGS = -Wall -Wextra -c -O3
+CFLAGS = -Wall -Wextra -c -O3 -g
 
 SRCDIR = src/
 INCDIR = inc/
@@ -12,7 +12,11 @@ INCLUDE_FLAGS = $(addprefix -I, $(INCDIR))
 
 .PHONY: all clean main
 
-all: main
+all: main 
+	 cp ./main .vscode/build/Debug/outDebug
+	 cp ./main inc/build/Debug/outDebug
+	./main
+
 
 main: $(BINDIR)csl.a
 	$(CXX) -Wall -Wextra -g -O2 -o $@ main.cpp $^

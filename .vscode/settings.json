@@ -58,7 +58,25 @@
     "complex": "cpp",
     "sstream": "cpp",
     "execution": "cpp",
-    "iomanip": "cpp"
+    "iomanip": "cpp",
+    "bit": "cpp",
+    "*.tcc": "cpp",
+    "chrono": "cpp",
+    "compare": "cpp",
+    "concepts": "cpp",
+    "functional": "cpp",
+    "iterator": "cpp",
+    "memory_resource": "cpp",
+    "random": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "deque": "cpp",
+    "format": "cpp",
+    "shared_mutex": "cpp",
+    "thread": "cpp",
+    "queue": "cpp",
+    "span": "cpp",
+    "stack": "cpp"
   },
   "C_Cpp_Runner.cCompilerPath": "clang",
   "C_Cpp_Runner.cppCompilerPath": "clang++",
@@ -116,5 +134,6 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-  "C_Cpp_Runner.msvcSecureNoWarnings": false
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "cmake.configureOnOpen": false
 }
