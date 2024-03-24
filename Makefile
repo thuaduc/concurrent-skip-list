@@ -12,12 +12,12 @@ LDFLAGS = -L$(GTEST_LIB) -lgtest -lgtest_main -pthread
 OBJS = $(addprefix $(BINDIR), concurrentSkipList.o node.o)
 INCS = $(addprefix -I, $(INCDIR))
 
-.PHONY: all clean main test
+.PHONY: all clean example test
 
-all: main test
+all: example
 
-main: $(BINDIR)csl.a
-	$(CXX) -o $@ $(APPDIR)main.cpp $^
+example: $(BINDIR)csl.a
+	$(CXX) -o $@ $(APPDIR)example.cpp $^
 
 test: $(BINDIR)csl.a
 	$(CXX) -o $@ $(APPDIR)test.cpp $^ $(LDFLAGS)
@@ -29,5 +29,5 @@ $(BINDIR)%.o: $(SRCDIR)%.cpp
 	$(CXX) $(CFLAGS) $(INCS) $< -o $@
 
 clean:
-	rm -rf $(BINDIR)* main test main.dSYM
+	rm -rf $(BINDIR)* example test example.dSYM
 
