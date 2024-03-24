@@ -3,7 +3,7 @@
 #include <iostream>
 #include <thread>
 
-#include "src/concurrentSkipList.cpp"
+#include "../src/concurrentSkipList.cpp"
 
 void basic() {
     ConcurrentSkipList<uint16_t, uint16_t, 4> csl{};

@@ -1,6 +1,7 @@
+.vscode
 test/test
 main
-main.dSYM
-skiplist.h
+*.dSYM
 *.o
 *.a
+googletest

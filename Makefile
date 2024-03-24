@@ -1,33 +1,33 @@
-CXX = clang++ -std=c++20
-CFLAGS = -Wall -Wextra -c -O3 -g
-
 SRCDIR = src/
 INCDIR = inc/
-OBJDIR = obj/
-TESTDIR = test/
 BINDIR = bin/
+APPDIR = app/
+GTEST_DIR = googletest/googletest
+GTEST_LIB = $(GTEST_DIR)lib/
 
-OBJS = $(addprefix $(OBJDIR), concurrentSkipList.o node.o)
-INCLUDE_FLAGS = $(addprefix -I, $(INCDIR))
+CXX = clang++ -std=c++20
+CFLAGS = -Wall -Wextra -c -O3
+LDFLAGS = -L$(GTEST_LIB) -lgtest -lgtest_main -pthread
 
-.PHONY: all clean main
+OBJS = $(addprefix $(BINDIR), concurrentSkipList.o node.o)
+INCS = $(addprefix -I, $(INCDIR))
 
-all: main 
-	 cp ./main .vscode/build/Debug/outDebug
-	 cp ./main inc/build/Debug/outDebug
-	./main
+.PHONY: all clean main test
 
+all: main test
 
 main: $(BINDIR)csl.a
-	$(CXX) -Wall -Wextra -g -O2 -o $@ main.cpp $^
+	$(CXX) -o $@ $(APPDIR)main.cpp $^
+
+test: $(BINDIR)csl.a
+	$(CXX) -o $@ $(APPDIR)test.cpp $^ $(LDFLAGS)
 
 $(BINDIR)csl.a: $(OBJS)
 	ar rcs $@ $^
 
-$(OBJDIR)%.o: $(SRCDIR)%.cpp
-	$(CXX) $(CFLAGS) $(INCLUDE_FLAGS) $< -o $@
+$(BINDIR)%.o: $(SRCDIR)%.cpp
+	$(CXX) $(CFLAGS) $(INCS) $< -o $@
 
 clean:
-	rm -f $(OBJDIR)* $(BINDIR)* main 
-	rm -r main.dSYM
+	rm -rf $(BINDIR)* main test main.dSYM
 
