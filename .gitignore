@@ -4,4 +4,4 @@ example
 *.dSYM
 *.o
 *.a
-googletest
+test

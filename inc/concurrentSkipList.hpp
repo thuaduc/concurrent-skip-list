@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include <climits>
 #include <cstdlib>
 #include <iomanip>
@@ -24,8 +25,8 @@ struct ConcurrentSkipList {
     size_t size();
 
    private:
-    int currentLevel = 0;
-    size_t elementsCount = 0;
+    std::atomic<int> currentLevel{0};
+    std::atomic<size_t> elementsCount{0};
 
     std::shared_ptr<Node<T, K>> head;
     std::shared_ptr<Node<T, K>> tail;
@@ -137,8 +138,10 @@ bool ConcurrentSkipList<T, K, maxLevel>::insertElement(T key, K value) {
         if (!valid) {
             continue;
         } else {
-            if (topLevel > currentLevel) currentLevel = topLevel;
-            ++elementsCount;
+            if (topLevel > currentLevel.load(std::memory_order_relaxed)) {
+                currentLevel.store(topLevel, std::memory_order_relaxed);
+            }
+            elementsCount.fetch_add(1, std::memory_order_relaxed);
             return true;
         }
     }
@@ -193,7 +196,7 @@ bool ConcurrentSkipList<T, K, maxLevel>::deleteElement(T key) {
             }
 
             if (valid) {
-                --elementsCount;
+                elementsCount.fetch_sub(1, std::memory_order_relaxed);
                 return true;
             }
         } else
